@@ -1,0 +1,30 @@
+server:
+  port: 8080
+  
+  
+userPoolId: us-east-2_AKZJM1972
+awsregion: us-east-2
+aws_Region_Cognito: us-east-2
+host: localhost
+port: 3306
+database: geoserviciosbd
+clientId: 3hti4opc15c970712kshflhp5u
+username: root
+password: 12345678
+      
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=utf8&useSSL=false&requireSSL=false
+    username: ${username}
+    password: ${password}
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true

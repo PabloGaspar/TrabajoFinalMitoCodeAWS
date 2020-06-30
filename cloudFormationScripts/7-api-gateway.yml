@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "api gateway"
+
+Resources:
+
+  myApiGateway: 
+    Type: AWS::ApiGateway::RestApi
+    Properties: 
+      BodyS3Location:
+        Bucket: mitocode-aws-api-gateway
+        Key: apiGatewayWithAWS.json
+      Description: APIs para el proyecto del curso aws mitocode
+      FailOnWarnings: true
+      Name: RestAPIs curso aws
+
+  myDeployToDev:
+    Type: AWS::ApiGateway::Deployment
+    Properties: 
+      Description: deploy to dev stage
+      RestApiId: !Ref myApiGateway
+
+  myStageDev:
+    Type: AWS::ApiGateway::Stage
+    Properties: 
+      DeploymentId: !Ref myDeployToDev
+      Description: "environment dev"
+      RestApiId: !Ref myApiGateway
+      StageName: dev
+
+Outputs:
+  endpointStageDev:
+    Description: url de conexion https para el stage dev
+    Value:  !Join [ "",["https://",!Ref myApiGateway,".execute-api.",!Ref "AWS::Region",".amazonaws.com/dev"]]

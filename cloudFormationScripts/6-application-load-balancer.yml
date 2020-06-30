@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "balanceador de carga"
+
+Resources:
+
+  myApplicationLoadBalancer: 
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+      IpAddressType: ipv4
+      Name: alb-curso
+      Scheme: internet-facing
+      SecurityGroups: 
+        - Fn::ImportValue: infraestructura-sgBalanceador
+      Subnets: 
+        - Fn::ImportValue: infraestructura-subnetPublica1
+        - Fn::ImportValue: infraestructura-subnetPublica2
+      Type: application
+
+  myListerHttpDefault:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      DefaultActions: 
+        - 
+          FixedResponseConfig: 
+            ContentType: "text/plain"
+            MessageBody: "Not default action"
+            StatusCode: 500
+          Order: 99
+          Type: fixed-response
+      LoadBalancerArn:
+        Ref: myApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+Outputs:
+  urlBalanceador:
+    Description: URL del balanceador generado
+    Value: 
+       Fn::Join: ["", ["http://", !GetAtt myApplicationLoadBalancer.DNSName]]
+
+  arnListener80:
+    Description: arn del listener http puerto 80
+    Value: 
+       Ref: myListerHttpDefault
+    Export:
+      Name: arn-balanceador-http-80

@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "pool de usuarios cognito"
+
+Resources:
+
+  myUserPool: 
+    Type: AWS::Cognito::UserPool
+    Properties: 
+      AdminCreateUserConfig: 
+        AllowAdminCreateUserOnly: true
+        InviteMessageTemplate: 
+          EmailMessage: Hola hemos creado tu usuario {username} con esta clave {####}, cambiala al ingresar al sistema
+          EmailSubject: Creacion de cuenta en la aplicacion
+        UnusedAccountValidityDays: 5
+      AutoVerifiedAttributes: 
+        - email
+      EmailVerificationMessage: Your verification code is {####}. 
+      EmailVerificationSubject: Your verification code
+      MfaConfiguration: "OFF"
+      Policies: 
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+      UserPoolName: userpool-cf
+      UsernameAttributes: 
+        - email
+
+  myAdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: 
+      Description: Grupo de Administradores de la aplicacion
+      GroupName: ADMIN
+      Precedence: 45
+      UserPoolId:
+        Ref: myUserPool
+
+  myUserGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: 
+      Description: Grupo de USUARIOS de la aplicacion
+      GroupName: USER
+      Precedence: 40
+      UserPoolId:
+        Ref: myUserPool
+
+  myClientAppFrontend:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      ClientName: angular
+      ExplicitAuthFlows: 
+        - ADMIN_NO_SRP_AUTH
+      GenerateSecret: false
+      UserPoolId:
+        Ref: myUserPool
+
+Outputs:
+  arnUserPool:
+    Description: arn del grupo de usuarios
+    Value: 
+      Fn::GetAtt: myUserPool.Arn
+    Export: 
+      Name: cognito-userpool-arn
+
+  userPoolId:
+    Description: id del grupo de usuarios
+    Value: 
+      Ref: myUserPool
+    Export: 
+      Name: cognito-userpool-id
+
+  clientId:
+    Description: id del cliente cognito
+    Value: 
+     Ref: myClientAppFrontend
+    Export: 
+      Name: cognito-client-id

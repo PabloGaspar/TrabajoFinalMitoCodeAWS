@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "base datos RDS"
+
+Parameters:
+  KeyName:
+    Description: password de la base datos
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    Default: course-aws-ohio
+  
+  TipoInstancia:
+    Description: tipo de ec2
+    Type: String
+    Default: t2.micro
+
+Mappings: 
+  RegionMap: 
+    us-east-1: 
+      "AMI": "ami-01d025118d8e760db"
+    us-east-2: 
+      "AMI": "ami-083ebc5a49573896a"
+
+Resources:
+
+  EC2bastion: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: 
+        Fn::FindInMap: 
+          - "RegionMap"
+          - Ref: "AWS::Region"
+          - "AMI"
+      KeyName: 
+        Ref: "KeyName"
+      InstanceType: 
+        Ref: TipoInstancia
+      SubnetId: 
+        Fn::ImportValue: infraestructura-subnetPublica2
+      SecurityGroupIds:
+      - Fn::ImportValue: infraestructura-sgBastion
+
+Outputs:
+  EC2bastionDNS:
+    Description: endpoint ec2 bastion
+    Value: 
+      Fn::GetAtt: EC2bastion.PublicIp
